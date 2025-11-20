@@ -1,29 +1,375 @@
 {% extends 'base.html' %}
 
-{% block title %}Barcode Scan - Warehouse Manager{% endblock %}
+{% block title %}Barcode Scanner - Warehouse Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    #interactive {
+        width: 100%;
+        max-width: 640px;
+        height: 480px;
+        overflow: hidden;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    #interactive video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .drawingBuffer {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .scanner-controls {
+        margin-top: 20px;
+    }
+
+    .medicine-card {
+        border-left: 4px solid #28a745;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <h2><i class="fas fa-barcode"></i> Barcode Scanner</h2>
-            <p class="text-muted">Quick sales via barcode scanning</p>
+            <p class="text-muted">Scan product barcodes using camera or enter manually</p>
             <hr>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="alert alert-info">
-                <h4 class="alert-heading"><i class="fas fa-clock"></i> Coming Soon!</h4>
-                <p>The barcode scanning page will be implemented in <strong>Phase 4</strong>.</p>
-                <hr>
-                <p class="mb-0">
-                    <strong>Features:</strong> Real-time camera preview, automatic barcode detection (EAN-13),
-                    quick sale recording, and manual barcode entry fallback.
-                </p>
+    <div class="row">
+        <!-- Scanner Section -->
+        <div class="col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-camera"></i> Camera Scanner</h5>
+                </div>
+                <div class="card-body">
+                    <div id="interactive" class="viewport mb-3"></div>
+
+                    <div class="scanner-controls text-center">
+                        <button id="start-scanner" class="btn btn-success btn-lg">
+                            <i class="fas fa-play"></i> Start Scanner
+                        </button>
+                        <button id="stop-scanner" class="btn btn-danger btn-lg" style="display: none;">
+                            <i class="fas fa-stop"></i> Stop Scanner
+                        </button>
+                    </div>
+
+                    <div id="scanner-status" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Manual Entry -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-keyboard"></i> Manual Entry</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('shared.scan') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="input-group">
+                            {{ form.barcode(class="form-control form-control-lg", placeholder="Enter 13-digit barcode") }}
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                        {% if form.barcode.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in form.barcode.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medicine Details Section -->
+        <div class="col-lg-5">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-pills"></i> Medicine Details</h5>
+                </div>
+                <div class="card-body">
+                    <div id="medicine-details">
+                        {% if medicine %}
+                        <div class="medicine-card card border-success mb-3">
+                            <div class="card-body">
+                                <h4 class="card-title">{{ medicine.name }}</h4>
+                                <hr>
+                                <p class="mb-2"><strong>Manufacturer:</strong> {{ medicine.manufacturer }}</p>
+                                <p class="mb-2"><strong>Category:</strong> <span class="badge bg-info">{{ medicine.category }}</span></p>
+                                <p class="mb-2"><strong>Price:</strong> <span class="text-success">₹{{ "%.2f"|format(medicine.price) }}</span></p>
+                                <p class="mb-2">
+                                    <strong>Stock:</strong>
+                                    {% if medicine.is_low_stock() %}
+                                        <span class="badge bg-warning text-dark">{{ medicine.stock }} units (Low)</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ medicine.stock }} units</span>
+                                    {% endif %}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Expiry:</strong>
+                                    {% if medicine.is_expired() %}
+                                        <span class="badge bg-danger">Expired ({{ medicine.expiry_date.strftime('%Y-%m-%d') }})</span>
+                                    {% elif medicine.is_expiring_soon() %}
+                                        <span class="badge bg-warning text-dark">Expiring Soon ({{ medicine.expiry_date.strftime('%Y-%m-%d') }})</span>
+                                    {% else %}
+                                        {{ medicine.expiry_date.strftime('%Y-%m-%d') }}
+                                    {% endif %}
+                                </p>
+                                <p class="mb-2"><strong>Barcode:</strong> <code>{{ medicine.barcode }}</code></p>
+
+                                {% if medicine.description %}
+                                <hr>
+                                <p class="text-muted small">{{ medicine.description }}</p>
+                                {% endif %}
+
+                                {% if not medicine.is_expired() and medicine.stock > 0 %}
+                                <hr>
+                                <form action="{{ url_for('shared.add_to_cart') }}" method="POST" class="add-to-cart-form" data-medicine-id="{{ medicine.medicine_id }}">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" name="quantity" value="1" min="1" max="{{ medicine.stock }}">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </div>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-pills fa-3x mb-3"></i>
+                            <p>Scan or enter a barcode to view medicine details</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- QuaggaJS for barcode scanning -->
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.8.4/dist/quagga.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    let scannerRunning = false;
+    let lastScannedCode = '';
+    let lastScanTime = 0;
+
+    // Initialize QuaggaJS
+    $('#start-scanner').click(function() {
+        startScanner();
+    });
+
+    $('#stop-scanner').click(function() {
+        stopScanner();
+    });
+
+    function startScanner() {
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector('#interactive'),
+                constraints: {
+                    width: 640,
+                    height: 480,
+                    facingMode: "environment"
+                }
+            },
+            decoder: {
+                readers: ["ean_reader", "ean_8_reader"]
+            },
+            locate: true
+        }, function(err) {
+            if (err) {
+                console.error(err);
+                showStatus('danger', 'Error starting scanner: ' + err.message);
+                return;
+            }
+            console.log("Scanner initialized");
+            Quagga.start();
+            scannerRunning = true;
+            $('#start-scanner').hide();
+            $('#stop-scanner').show();
+            showStatus('success', 'Scanner started. Point camera at barcode...');
+        });
+
+        Quagga.onDetected(function(result) {
+            let code = result.codeResult.code;
+            let now = Date.now();
+
+            // Prevent duplicate scans within 2 seconds
+            if (code === lastScannedCode && (now - lastScanTime) < 2000) {
+                return;
+            }
+
+            lastScannedCode = code;
+            lastScanTime = now;
+
+            console.log("Barcode detected:", code);
+            showStatus('info', 'Barcode detected: ' + code);
+
+            // Search for medicine
+            searchMedicine(code);
+        });
+    }
+
+    function stopScanner() {
+        if (scannerRunning) {
+            Quagga.stop();
+            scannerRunning = false;
+            $('#stop-scanner').hide();
+            $('#start-scanner').show();
+            showStatus('secondary', 'Scanner stopped');
+        }
+    }
+
+    function searchMedicine(barcode) {
+        $.ajax({
+            url: '/api/scan_barcode',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ barcode: barcode }),
+            success: function(response) {
+                if (response.success) {
+                    displayMedicine(response.medicine);
+                    showStatus('success', response.message);
+
+                    // Play success sound
+                    playBeep();
+                }
+            },
+            error: function(xhr) {
+                let response = xhr.responseJSON;
+                showStatus('warning', response.message || 'Medicine not found');
+            }
+        });
+    }
+
+    function displayMedicine(medicine) {
+        let stockBadge = medicine.is_low_stock ?
+            '<span class="badge bg-warning text-dark">' + medicine.stock + ' units (Low)</span>' :
+            '<span class="badge bg-success">' + medicine.stock + ' units</span>';
+
+        let expiryBadge = medicine.is_expiring_soon ?
+            '<span class="badge bg-warning text-dark">Expiring Soon (' + medicine.expiry_date + ')</span>' :
+            medicine.expiry_date;
+
+        let html = '<div class="medicine-card card border-success mb-3">' +
+                   '<div class="card-body">' +
+                   '<h4 class="card-title">' + medicine.name + '</h4><hr>' +
+                   '<p class="mb-2"><strong>Manufacturer:</strong> ' + medicine.manufacturer + '</p>' +
+                   '<p class="mb-2"><strong>Category:</strong> <span class="badge bg-info">' + medicine.category + '</span></p>' +
+                   '<p class="mb-2"><strong>Price:</strong> <span class="text-success">₹' + parseFloat(medicine.price).toFixed(2) + '</span></p>' +
+                   '<p class="mb-2"><strong>Stock:</strong> ' + stockBadge + '</p>' +
+                   '<p class="mb-2"><strong>Expiry:</strong> ' + expiryBadge + '</p>' +
+                   '<p class="mb-2"><strong>Barcode:</strong> <code>' + medicine.barcode + '</code></p>' +
+                   '<hr>' +
+                   '<div class="input-group">' +
+                   '<input type="number" class="form-control" id="cart-quantity" value="1" min="1" max="' + medicine.stock + '">' +
+                   '<button class="btn btn-success" onclick="addToCartFromScan(' + medicine.id + ')"><i class="fas fa-cart-plus"></i> Add to Cart</button>' +
+                   '</div>' +
+                   '</div></div>';
+
+        $('#medicine-details').html(html);
+    }
+
+    function showStatus(type, message) {
+        let html = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+                   message +
+                   '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        $('#scanner-status').html(html);
+
+        setTimeout(function() {
+            $('#scanner-status .alert').fadeOut();
+        }, 5000);
+    }
+
+    function playBeep() {
+        // Simple beep sound
+        let context = new (window.AudioContext || window.webkitAudioContext)();
+        let oscillator = context.createOscillator();
+        let gainNode = context.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.3, context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
+
+        oscillator.start(context.currentTime);
+        oscillator.stop(context.currentTime + 0.1);
+    }
+
+    // Global function for adding to cart from scanned medicine
+    window.addToCartFromScan = function(medicineId) {
+        let quantity = $('#cart-quantity').val();
+
+        $.ajax({
+            url: '/add_to_cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                medicine_id: medicineId,
+                quantity: parseInt(quantity)
+            }),
+            success: function(response) {
+                if (response.success) {
+                    showStatus('success', response.message + '. <a href="{{ url_for("shared.sell") }}" class="alert-link">Go to cart</a>');
+                }
+            },
+            error: function(xhr) {
+                let response = xhr.responseJSON;
+                showStatus('danger', response.message || 'Error adding to cart');
+            }
+        });
+    };
+
+    // Handle manual add to cart
+    $(document).on('submit', '.add-to-cart-form', function(e) {
+        e.preventDefault();
+        let medicineId = $(this).data('medicine-id');
+        let quantity = $(this).find('input[name="quantity"]').val();
+
+        $.ajax({
+            url: '/add_to_cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                medicine_id: medicineId,
+                quantity: parseInt(quantity)
+            }),
+            success: function(response) {
+                if (response.success) {
+                    window.location.href = '{{ url_for("shared.sell") }}';
+                }
+            },
+            error: function(xhr) {
+                let response = xhr.responseJSON;
+                alert(response.message || 'Error adding to cart');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

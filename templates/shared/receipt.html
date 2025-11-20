@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Receipt - Warehouse Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .receipt-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border: 2px solid #dee2e6;
+        border-radius: 5px;
+    }
+
+    .receipt-header {
+        text-align: center;
+        border-bottom: 2px dashed #dee2e6;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .receipt-header h1 {
+        font-size: 28px;
+        font-weight: bold;
+        color: #0d6efd;
+    }
+
+    .receipt-info {
+        margin-bottom: 20px;
+    }
+
+    .receipt-table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .receipt-table th {
+        background: #f8f9fa;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .receipt-table td {
+        padding: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .receipt-total {
+        text-align: right;
+        font-size: 20px;
+        font-weight: bold;
+        border-top: 2px solid #0d6efd;
+        padding-top: 15px;
+        margin-top: 20px;
+    }
+
+    .receipt-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px dashed #dee2e6;
+        color: #6c757d;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .receipt-container, .receipt-container * {
+            visibility: visible;
+        }
+        .receipt-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4 no-print">
+        <div class="col-12">
+            <h2><i class="fas fa-receipt"></i> Sale Receipt</h2>
+            <p class="text-muted">Transaction completed successfully</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <h1><i class="fas fa-warehouse"></i> Warehouse Manager</h1>
+            <p class="mb-0">Pharmacy & Inventory Management</p>
+            <p class="text-muted small">Contact: info@warehousemanager.com | Phone: +91-123-456-7890</p>
+        </div>
+
+        <div class="receipt-info">
+            <div class="row">
+                <div class="col-6">
+                    <strong>Receipt #:</strong> {{ sale.sale_id }}<br>
+                    <strong>Date:</strong> {{ sale.date }}<br>
+                    <strong>Payment:</strong> {{ sale.payment_method }}
+                </div>
+                <div class="col-6 text-end">
+                    {% if sale.customer_name %}
+                    <strong>Customer:</strong> {{ sale.customer_name }}<br>
+                    {% endif %}
+                    {% if sale.customer_phone %}
+                    <strong>Phone:</strong> {{ sale.customer_phone }}<br>
+                    {% endif %}
+                    <strong>Served by:</strong> {{ current_user.username }}
+                </div>
+            </div>
+        </div>
+
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th width="50">#</th>
+                    <th>Item</th>
+                    <th width="100" class="text-center">Qty</th>
+                    <th width="120" class="text-end">Price</th>
+                    <th width="120" class="text-end">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sale.items %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <strong>{{ item.name }}</strong><br>
+                        <small class="text-muted">Barcode: {{ item.barcode }}</small>
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-end">₹{{ "%.2f"|format(item.price) }}</td>
+                    <td class="text-end">₹{{ "%.2f"|format(item.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="receipt-total">
+            <span class="me-4">Total Items: {{ sale.items|length }}</span>
+            <span>Grand Total: ₹{{ "%.2f"|format(sale.total_amount) }}</span>
+        </div>
+
+        <div class="receipt-footer">
+            <p class="mb-1"><strong>Thank you for your purchase!</strong></p>
+            <p class="mb-0 small">This is a computer-generated receipt and does not require a signature.</p>
+            <p class="mb-0 small">Please check your medicines before leaving. No returns on opened medicines.</p>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 no-print">
+        <button onclick="window.print()" class="btn btn-primary btn-lg me-2">
+            <i class="fas fa-print"></i> Print Receipt
+        </button>
+        <a href="{{ url_for('shared.sell') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-shopping-cart"></i> New Sale
+        </a>
+        <a href="{{ url_for('staff.dashboard') if current_user.is_staff() else url_for('admin.dashboard') }}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-print prompt
+    if (confirm('Would you like to print the receipt?')) {
+        window.print();
+    }
+});
+</script>
+{% endblock %}

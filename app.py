@@ -54,6 +54,7 @@ if __name__ == '__main__':
     print("Phase 1: Project Setup Complete ✓")
     print("Phase 2: Authentication System Complete ✓")
     print("Phase 3: Medicine Management Complete ✓")
+    print("Phase 4: Sales Module Complete ✓")
     print("Starting Flask Development Server...")
     print("="*50 + "\n")
     app.run(host='0.0.0.0', port=5000, debug=True)

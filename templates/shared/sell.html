@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Sell Medicines - Warehouse Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-shopping-cart"></i> Sell Medicines</h2>
+            <p class="text-muted">Add medicines to cart and complete sale</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Medicine Search and Selection -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-pills"></i> Search Medicines</h5>
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" id="medicine-search" class="form-control" placeholder="Search by name or manufacturer..." autofocus>
+                        <button class="btn btn-primary" type="button" id="search-btn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="{{ url_for('shared.scan') }}" class="btn btn-success">
+                            <i class="fas fa-barcode"></i> Scan Barcode
+                        </a>
+                    </div>
+
+                    <div id="medicine-results" class="table-responsive">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shopping Cart -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> Cart
+                        <span class="badge bg-light text-dark float-end" id="cart-count">{{ cart|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if cart %}
+                        <div class="list-group" id="cart-items">
+                            {% for item in cart %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ item.name }}</h6>
+                                        <small class="text-muted">₹{{ "%.2f"|format(item.price) }} × {{ item.quantity }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <strong class="d-block">₹{{ "%.2f"|format(item.subtotal) }}</strong>
+                                        <form method="POST" action="{{ url_for('shared.remove_from_cart', index=loop.index0) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this item?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-5" id="empty-cart">
+                            <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                            <p>Cart is empty</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <strong>Total:</strong>
+                        <h4 class="mb-0">₹<span id="cart-total">{{ "%.2f"|format(cart_total) }}</span></h4>
+                    </div>
+
+                    {% if cart %}
+                    <form method="POST" action="{{ url_for('shared.clear_cart') }}" class="mb-2">
+                        <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Clear entire cart?')">
+                            <i class="fas fa-trash-alt"></i> Clear Cart
+                        </button>
+                    </form>
+
+                    <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#checkoutModal">
+                        <i class="fas fa-check-circle"></i> Complete Sale
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-success w-100" disabled>
+                        <i class="fas fa-check-circle"></i> Complete Sale
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('shared.sell') }}">
+                {{ form.hidden_tag() }}
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-receipt"></i> Complete Sale</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        {{ form.customer_name.label(class="form-label") }}
+                        {{ form.customer_name(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.customer_phone.label(class="form-label") }}
+                        {{ form.customer_phone(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.payment_method.label(class="form-label") }}
+                        <select name="payment_method" class="form-select">
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total Amount:</strong>
+                        <h4>₹{{ "%.2f"|format(cart_total) }}</h4>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ form.submit(class="btn btn-success") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Search medicines
+    function searchMedicines(query) {
+        if (query.length < 2) {
+            $('#medicine-results').html('<p class="text-muted">Type at least 2 characters to search...</p>');
+            return;
+        }
+
+        $.ajax({
+            url: '/api/search_medicines?q=' + encodeURIComponent(query),
+            method: 'GET',
+            success: function(data) {
+                if (data.medicines && data.medicines.length > 0) {
+                    let html = '<table class="table table-hover"><thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead><tbody>';
+
+                    data.medicines.forEach(function(med) {
+                        let stockBadge = med.is_low_stock ? '<span class="badge bg-warning text-dark">Low Stock</span>' : '<span class="badge bg-success">' + med.stock + ' units</span>';
+                        let expiredBadge = med.is_expired ? '<span class="badge bg-danger ms-1">Expired</span>' : '';
+                        let disabled = med.is_expired || med.stock == 0 ? 'disabled' : '';
+
+                        html += '<tr>';
+                        html += '<td><strong>' + med.name + '</strong><br><small class="text-muted">' + med.manufacturer + '</small> ' + expiredBadge + '</td>';
+                        html += '<td>₹' + parseFloat(med.price).toFixed(2) + '</td>';
+                        html += '<td>' + stockBadge + '</td>';
+                        html += '<td><button class="btn btn-sm btn-primary add-to-cart-btn" data-id="' + med.id + '" data-name="' + med.name + '" ' + disabled + '><i class="fas fa-plus"></i> Add</button></td>';
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table>';
+                    $('#medicine-results').html(html);
+                } else {
+                    $('#medicine-results').html('<div class="alert alert-info">No medicines found</div>');
+                }
+            },
+            error: function() {
+                $('#medicine-results').html('<div class="alert alert-danger">Error searching medicines</div>');
+            }
+        });
+    }
+
+    // Search on button click
+    $('#search-btn').click(function() {
+        let query = $('#medicine-search').val();
+        searchMedicines(query);
+    });
+
+    // Search on enter key
+    $('#medicine-search').keypress(function(e) {
+        if (e.which == 13) {
+            e.preventDefault();
+            searchMedicines($(this).val());
+        }
+    });
+
+    // Add to cart
+    $(document).on('click', '.add-to-cart-btn', function() {
+        let medicineId = $(this).data('id');
+        let medicineName = $(this).data('name');
+        let quantity = 1;
+
+        $.ajax({
+            url: '/add_to_cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                medicine_id: medicineId,
+                quantity: quantity
+            }),
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    showToast('success', response.message);
+
+                    // Reload page to update cart
+                    location.reload();
+                }
+            },
+            error: function(xhr) {
+                let response = xhr.responseJSON;
+                showToast('danger', response.message || 'Error adding to cart');
+            }
+        });
+    });
+
+    function showToast(type, message) {
+        let alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+                        message +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+        $('.container-fluid').prepend(alertHtml);
+
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}
