@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Sales History - Warehouse Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="bi bi-clock-history"></i> Sales History</h2>
+            <p class="text-muted">View all sales transactions</p>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{{ url_for('sales.sell_medicines') }}" class="btn btn-success">
+                <i class="bi bi-cart-plus"></i> New Sale
+            </a>
+            <a href="{{ url_for('sales.scan') }}" class="btn btn-primary">
+                <i class="bi bi-upc-scan"></i> Barcode Scanner
+            </a>
+        </div>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i>
+                        {% if current_user.role == 'Admin' %}All Sales{% else %}My Sales{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if sales.items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Receipt #</th>
+                                        <th>Date & Time</th>
+                                        <th>Medicine</th>
+                                        <th>Quantity</th>
+                                        <th>Total Price</th>
+                                        <th>Season</th>
+                                        {% if current_user.role == 'Admin' %}
+                                        <th>Staff</th>
+                                        {% endif %}
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sale in sales.items %}
+                                        <tr>
+                                            <td><strong>#{{ sale.sale_id }}</strong></td>
+                                            <td>{{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                <strong>{{ sale.medicine.name }}</strong><br>
+                                                <small class="text-muted">{{ sale.medicine.manufacturer }}</small>
+                                            </td>
+                                            <td>{{ sale.quantity_sold }}</td>
+                                            <td>₹{{ "%.2f"|format(sale.total_price) }}</td>
+                                            <td><span class="badge bg-info">{{ sale.get_season() }}</span></td>
+                                            {% if current_user.role == 'Admin' %}
+                                            <td>{{ sale.user.username }}</td>
+                                            {% endif %}
+                                            <td>
+                                                <a href="{{ url_for('sales.receipt', sale_id=sale.sale_id) }}"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-receipt"></i> Receipt
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if sales.pages > 1 %}
+                            <nav aria-label="Sales pagination">
+                                <ul class="pagination justify-content-center">
+                                    <!-- Previous -->
+                                    <li class="page-item {% if not sales.has_prev %}disabled{% endif %}">
+                                        <a class="page-link"
+                                           href="{{ url_for('sales.sales_history', page=sales.prev_num) if sales.has_prev else '#' }}">
+                                            Previous
+                                        </a>
+                                    </li>
+
+                                    <!-- Page Numbers -->
+                                    {% for page_num in range(1, sales.pages + 1) %}
+                                        {% if page_num <= 3 or page_num > sales.pages - 3 or (page_num >= sales.page - 1 and page_num <= sales.page + 1) %}
+                                            <li class="page-item {% if page_num == sales.page %}active{% endif %}">
+                                                <a class="page-link" href="{{ url_for('sales.sales_history', page=page_num) }}">
+                                                    {{ page_num }}
+                                                </a>
+                                            </li>
+                                        {% elif page_num == 4 or page_num == sales.pages - 3 %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <!-- Next -->
+                                    <li class="page-item {% if not sales.has_next %}disabled{% endif %}">
+                                        <a class="page-link"
+                                           href="{{ url_for('sales.sales_history', page=sales.next_num) if sales.has_next else '#' }}">
+                                            Next
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        {% endif %}
+
+                        <!-- Summary -->
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-info-circle"></i>
+                            Showing {{ sales.items|length }} of {{ sales.total }} sales
+                            (Page {{ sales.page }} of {{ sales.pages }})
+                        </div>
+
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            No sales recorded yet.
+                            <a href="{{ url_for('sales.sell_medicines') }}">Record your first sale</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

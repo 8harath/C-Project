@@ -6,23 +6,198 @@
 <div class="container">
     <div class="row">
         <div class="col-12">
-            <h2><i class="fas fa-shopping-cart"></i> Sell Medicines</h2>
+            <h2><i class="bi bi-cart-plus"></i> Sell Medicines</h2>
             <p class="text-muted">Record sales transactions</p>
             <hr>
         </div>
     </div>
 
-    <div class="row mt-4">
+    <!-- Quick Actions -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="alert alert-info">
-                <h4 class="alert-heading"><i class="fas fa-clock"></i> Coming Soon!</h4>
-                <p>The sales recording page will be implemented in <strong>Phase 4</strong>.</p>
-                <hr>
-                <p class="mb-0">
-                    <strong>Features:</strong> Browse medicines, select quantity, automatic stock updates, receipt generation, and transaction history.
-                </p>
+            <a href="{{ url_for('sales.scan') }}" class="btn btn-primary">
+                <i class="bi bi-upc-scan"></i> Barcode Scanner
+            </a>
+            <a href="{{ url_for('sales.sales_history') }}" class="btn btn-secondary">
+                <i class="bi bi-clock-history"></i> Sales History
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sale Form -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Record Sale</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('sales.sell_medicines') }}">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.medicine_id.label(class="form-label") }}
+                            {{ form.medicine_id(class="form-select", id="medicine-select") }}
+                            {% if form.medicine_id.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.medicine_id.errors %}
+                                        <small>{{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.quantity.label(class="form-label") }}
+                            {{ form.quantity(class="form-control", min="1", value="1") }}
+                            {% if form.quantity.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.quantity.errors %}
+                                        <small>{{ error }}</small><br>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Medicine Details Display -->
+                        <div id="medicine-details" class="alert alert-info" style="display: none;">
+                            <h6>Selected Medicine Details:</h6>
+                            <p class="mb-1"><strong>Name:</strong> <span id="detail-name"></span></p>
+                            <p class="mb-1"><strong>Manufacturer:</strong> <span id="detail-manufacturer"></span></p>
+                            <p class="mb-1"><strong>Price:</strong> ₹<span id="detail-price"></span></p>
+                            <p class="mb-1"><strong>Available Stock:</strong> <span id="detail-stock"></span></p>
+                            <hr>
+                            <p class="mb-0"><strong>Total:</strong> ₹<span id="detail-total">0.00</span></p>
+                        </div>
+
+                        {{ form.submit(class="btn btn-success w-100") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Medicines List -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-capsule"></i> Available Medicines</h5>
+                </div>
+                <div class="card-body">
+                    {% if medicines %}
+                        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                            <table class="table table-hover">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Manufacturer</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Expiry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for medicine in medicines %}
+                                        <tr class="medicine-row" data-id="{{ medicine.medicine_id }}"
+                                            data-name="{{ medicine.name }}"
+                                            data-manufacturer="{{ medicine.manufacturer }}"
+                                            data-price="{{ medicine.price }}"
+                                            data-stock="{{ medicine.stock }}"
+                                            style="cursor: pointer;">
+                                            <td>
+                                                <strong>{{ medicine.name }}</strong>
+                                                {% if medicine.is_low_stock() %}
+                                                    <span class="badge bg-warning text-dark">Low Stock</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ medicine.manufacturer }}</td>
+                                            <td><span class="badge bg-info">{{ medicine.category }}</span></td>
+                                            <td>₹{{ "%.2f"|format(medicine.price) }}</td>
+                                            <td>
+                                                <span class="badge {% if medicine.is_low_stock() %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                                    {{ medicine.stock }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{ medicine.expiry_date.strftime('%Y-%m-%d') }}
+                                                {% if medicine.is_expiring_soon() %}
+                                                    <span class="badge bg-warning text-dark">Expiring Soon</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            No medicines available for sale. All medicines may be out of stock or expired.
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle medicine selection from dropdown
+    const medicineSelect = document.getElementById('medicine-select');
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    const medicineDetails = document.getElementById('medicine-details');
+
+    // Store medicine data
+    const medicineData = {};
+    {% for medicine in medicines %}
+    medicineData[{{ medicine.medicine_id }}] = {
+        name: "{{ medicine.name }}",
+        manufacturer: "{{ medicine.manufacturer }}",
+        price: {{ medicine.price }},
+        stock: {{ medicine.stock }}
+    };
+    {% endfor %}
+
+    function updateMedicineDetails() {
+        const selectedId = parseInt(medicineSelect.value);
+        if (selectedId && medicineData[selectedId]) {
+            const medicine = medicineData[selectedId];
+            const quantity = parseInt(quantityInput.value) || 1;
+            const total = (medicine.price * quantity).toFixed(2);
+
+            document.getElementById('detail-name').textContent = medicine.name;
+            document.getElementById('detail-manufacturer').textContent = medicine.manufacturer;
+            document.getElementById('detail-price').textContent = medicine.price.toFixed(2);
+            document.getElementById('detail-stock').textContent = medicine.stock;
+            document.getElementById('detail-total').textContent = total;
+
+            medicineDetails.style.display = 'block';
+        } else {
+            medicineDetails.style.display = 'none';
+        }
+    }
+
+    medicineSelect.addEventListener('change', updateMedicineDetails);
+    quantityInput.addEventListener('input', updateMedicineDetails);
+
+    // Handle row click to select medicine
+    document.querySelectorAll('.medicine-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const medicineId = this.dataset.id;
+            medicineSelect.value = medicineId;
+            updateMedicineDetails();
+
+            // Highlight selected row
+            document.querySelectorAll('.medicine-row').forEach(r => r.classList.remove('table-active'));
+            this.classList.add('table-active');
+
+            // Scroll to form on mobile
+            if (window.innerWidth < 992) {
+                document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+</script>
 {% endblock %}

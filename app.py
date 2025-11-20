@@ -19,10 +19,12 @@ def create_app(config_class=Config):
     from routes.auth import auth_bp
     from routes.admin import admin_bp
     from routes.medicine import medicine_bp
+    from routes.sales import sales_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(medicine_bp, url_prefix='/medicines')
+    app.register_blueprint(sales_bp)
 
     # Create database tables
     with app.app_context():

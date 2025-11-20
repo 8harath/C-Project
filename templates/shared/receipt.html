@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Receipt - Warehouse Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .receipt-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .receipt {
+        border: 2px solid #333;
+        padding: 30px;
+        background: white;
+    }
+
+    .receipt-header {
+        text-align: center;
+        border-bottom: 2px dashed #333;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .receipt-details {
+        margin: 20px 0;
+    }
+
+    .receipt-details table {
+        width: 100%;
+    }
+
+    .receipt-details td {
+        padding: 8px 0;
+    }
+
+    .receipt-total {
+        border-top: 2px solid #333;
+        margin-top: 20px;
+        padding-top: 15px;
+    }
+
+    .receipt-footer {
+        text-align: center;
+        border-top: 2px dashed #333;
+        margin-top: 20px;
+        padding-top: 20px;
+        font-size: 0.9em;
+    }
+
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .receipt {
+            border: none;
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container receipt-container">
+    <!-- Action Buttons -->
+    <div class="row mb-3 no-print">
+        <div class="col-12 text-center">
+            <button onclick="window.print()" class="btn btn-primary me-2">
+                <i class="bi bi-printer"></i> Print Receipt
+            </button>
+            <a href="{{ url_for('sales.sell_medicines') }}" class="btn btn-success me-2">
+                <i class="bi bi-cart-plus"></i> New Sale
+            </a>
+            <a href="{{ url_for('sales.sales_history') }}" class="btn btn-secondary">
+                <i class="bi bi-clock-history"></i> Sales History
+            </a>
+        </div>
+    </div>
+
+    <!-- Receipt -->
+    <div class="receipt">
+        <div class="receipt-header">
+            <h2><i class="bi bi-hospital"></i> Warehouse Inventory</h2>
+            <h4>Sales Receipt</h4>
+            <p class="mb-0">Pharmaceutical Inventory Management</p>
+        </div>
+
+        <div class="receipt-details">
+            <table>
+                <tr>
+                    <td><strong>Receipt No:</strong></td>
+                    <td class="text-end">#{{ sale.sale_id }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Date & Time:</strong></td>
+                    <td class="text-end">{{ sale.sale_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Staff:</strong></td>
+                    <td class="text-end">{{ current_user.username }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Season:</strong></td>
+                    <td class="text-end">{{ sale.get_season() }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="receipt-details">
+            <h5 class="mb-3">Item Details</h5>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>{{ medicine.name }}</strong><br>
+                            <small class="text-muted">{{ medicine.manufacturer }}</small><br>
+                            <small class="text-muted">Barcode: {{ medicine.barcode }}</small>
+                        </td>
+                        <td class="text-end">{{ sale.quantity_sold }}</td>
+                        <td class="text-end">₹{{ "%.2f"|format(medicine.price) }}</td>
+                        <td class="text-end">₹{{ "%.2f"|format(sale.total_price) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="receipt-total">
+            <table class="w-100">
+                <tr>
+                    <td><h5>Total Amount:</h5></td>
+                    <td class="text-end"><h5>₹{{ "%.2f"|format(sale.total_price) }}</h5></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="receipt-footer">
+            <p class="mb-2"><strong>Thank you for your purchase!</strong></p>
+            <p class="mb-1">Team: Chandralekha S, Akshaya N, S Sridevi</p>
+            <p class="mb-0">Contact: chandralekha508@gmail.com | +91 7022897595</p>
+        </div>
+    </div>
+
+    <!-- Additional Information (Not Printed) -->
+    <div class="row mt-4 no-print">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Additional Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Medicine Category:</strong> {{ medicine.category }}</p>
+                            <p><strong>Expiry Date:</strong> {{ medicine.expiry_date.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Remaining Stock:</strong> {{ medicine.stock }} units</p>
+                            {% if medicine.is_low_stock() %}
+                                <div class="alert alert-warning py-2">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <strong>Low Stock Alert:</strong> This medicine is running low. Reorder level: {{ medicine.reorder_level }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
