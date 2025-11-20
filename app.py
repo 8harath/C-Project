@@ -28,58 +28,21 @@ def create_app(config_name='default'):
         db.create_all()
         print("✓ Database tables created successfully")
 
-    # Register blueprints (will add in Phase 2)
-    # from routes.auth import auth_bp
-    # app.register_blueprint(auth_bp)
+    # Register blueprints
+    from routes.auth import auth_bp
+    from routes.admin import admin_bp
+    from routes.staff import staff_bp
+    from routes.shared import shared_bp
 
-    # Home route (temporary)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(staff_bp)
+    app.register_blueprint(shared_bp)
+
+    # Home route
     @app.route('/')
     def home():
-        return '''
-        <html>
-            <head>
-                <title>Warehouse Inventory Management</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100vh;
-                        margin: 0;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    }
-                    .container {
-                        text-align: center;
-                        background: white;
-                        padding: 50px;
-                        border-radius: 10px;
-                        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-                    }
-                    h1 {
-                        color: #333;
-                        margin-bottom: 10px;
-                    }
-                    p {
-                        color: #666;
-                        font-size: 18px;
-                    }
-                    .status {
-                        color: #28a745;
-                        font-weight: bold;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🏥 Warehouse Inventory Management System</h1>
-                    <p class="status">✓ Phase 1 Complete - System Initialized</p>
-                    <p>Database models created and ready for use.</p>
-                    <p><small>Authentication and UI coming in Phase 2...</small></p>
-                </div>
-            </body>
-        </html>
-        '''
+        return render_template('home.html')
 
     return app
 
@@ -89,6 +52,7 @@ if __name__ == '__main__':
     print("WAREHOUSE INVENTORY MANAGEMENT SYSTEM")
     print("="*50)
     print("Phase 1: Project Setup Complete ✓")
+    print("Phase 2: Authentication System Complete ✓")
     print("Starting Flask Development Server...")
     print("="*50 + "\n")
     app.run(host='0.0.0.0', port=5000, debug=True)

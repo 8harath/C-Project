@@ -1,0 +1,104 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('home') if current_user.is_anonymous else (url_for('admin.dashboard') if current_user.is_admin() else url_for('staff.dashboard')) }}">
+            <i class="fas fa-warehouse"></i> Warehouse Manager
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                    <!-- Admin Menu -->
+                    {% if current_user.is_admin() %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-pills"></i> Manage Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-exchange-alt"></i> Alternatives
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-chart-line"></i> Insights
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-file-alt"></i> Reports
+                            </a>
+                        </li>
+                    {% else %}
+                        <!-- Staff Menu -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('staff.dashboard') }}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('shared.products') }}">
+                                <i class="fas fa-pills"></i> Products
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Common Menu Items -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('shared.sell') }}">
+                            <i class="fas fa-shopping-cart"></i> Sell
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('shared.scan') }}">
+                            <i class="fas fa-barcode"></i> Scan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('shared.about') }}">
+                            <i class="fas fa-info-circle"></i> About
+                        </a>
+                    </li>
+
+                    <!-- User Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text"><strong>Role:</strong> {{ current_user.role }}</span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <!-- Public Menu -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('shared.about') }}">
+                            <i class="fas fa-info-circle"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

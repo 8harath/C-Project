@@ -1,0 +1,37 @@
+<footer class="bg-dark text-white mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5><i class="fas fa-warehouse"></i> Warehouse Manager</h5>
+                <p class="text-muted">Pharmaceutical Inventory Management System</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{{ url_for('shared.about') }}" class="text-white-50 text-decoration-none">About Us</a></li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('admin.dashboard') if current_user.is_admin() else url_for('staff.dashboard') }}" class="text-white-50 text-decoration-none">Dashboard</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}" class="text-white-50 text-decoration-none">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h5>Contact</h5>
+                <p class="text-muted">
+                    <i class="fas fa-envelope"></i> chandralekha508@gmail.com<br>
+                    <i class="fas fa-phone"></i> +91 7022897595
+                </p>
+                <div class="social-links">
+                    <a href="#" class="text-white-50 me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white-50"><i class="fab fa-google-play fa-lg"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="bg-secondary">
+        <div class="text-center text-muted">
+            <p class="mb-1">&copy; 2024 Warehouse Inventory Management System. All rights reserved.</p>
+            <p class="small mb-0">Developed by: Chandralekha S, Akshaya N, S Sridevi</p>
+        </div>
+    </div>
+</footer>

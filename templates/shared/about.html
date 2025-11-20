@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - Warehouse Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2><i class="fas fa-info-circle"></i> About Us</h2>
+            <hr>
+        </div>
+    </div>
+
+    <!-- System Description -->
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <h3>Warehouse and Inventory Management System</h3>
+            <p class="lead">
+                A comprehensive pharmaceutical inventory management solution designed to streamline
+                medicine tracking, sales recording, and analytical insights.
+            </p>
+            <p>
+                Our system enables role-based access for administrators and staff to efficiently manage
+                medicine inventory, record sales transactions through barcode scanning, and generate
+                valuable analytical reports. With features like low stock alerts, seasonal forecasting,
+                and alternative medicine recommendations, we help pharmacies maintain optimal inventory
+                levels and improve customer service.
+            </p>
+            <p>
+                Built with modern web technologies including Flask, SQLAlchemy, and Bootstrap,
+                the system offers a responsive and intuitive user interface accessible from any device.
+            </p>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-star"></i> Key Features</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Role-based Access Control</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Medicine CRUD Operations</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Barcode Scanning</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Sales Recording</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Low Stock Alerts</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Analytics & Reports</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Predictive Insights</li>
+                    <li class="list-group-item"><i class="fas fa-check text-success"></i> Alternative Medicines</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3><i class="fas fa-users"></i> Development Team</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-circle fa-4x text-primary mb-3"></i>
+                    <h5 class="card-title">Chandralekha S</h5>
+                    <p class="text-muted">Project Lead</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-circle fa-4x text-success mb-3"></i>
+                    <h5 class="card-title">Akshaya N</h5>
+                    <p class="text-muted">Team Member</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-user-circle fa-4x text-info mb-3"></i>
+                    <h5 class="card-title">S Sridevi</h5>
+                    <p class="text-muted">Team Member</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3><i class="fas fa-envelope"></i> Contact Information</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-envelope text-primary"></i> Email</h5>
+                    <p class="card-text">
+                        <a href="mailto:chandralekha508@gmail.com">chandralekha508@gmail.com</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-phone text-success"></i> Phone</h5>
+                    <p class="card-text">
+                        <a href="tel:+917022897595">+91 7022897595</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12 text-center">
+            <h5>Connect With Us</h5>
+            <div class="mt-3">
+                <a href="#" class="btn btn-outline-primary btn-lg me-2">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+                <a href="#" class="btn btn-outline-success btn-lg">
+                    <i class="fab fa-google-play"></i> Play Store
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
