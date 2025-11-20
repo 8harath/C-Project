@@ -1,73 +1,65 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Register - Warehouse Manager{% endblock %}
+{% block title %}Register - Warehouse Inventory Management{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
         <div class="card shadow">
-            <div class="card-header bg-success text-white text-center">
-                <h3><i class="fas fa-user-plus"></i> Register</h3>
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Register</h4>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
-                    {{ form.hidden_tag() }}
-
+                <form method="POST" action="{{ url_for('auth.register') }}">
                     <div class="mb-3">
-                        {{ form.username.label(class="form-label") }}
-                        {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="Choose a username") }}
-                        {% if form.username.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.username.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                        <small class="form-text text-muted">3-20 characters, alphanumeric</small>
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                               minlength="3" maxlength="20" required autofocus
+                               pattern="[a-zA-Z0-9_]+"
+                               title="Username can only contain letters, numbers, and underscores">
+                        <div class="form-text">3-20 characters, letters, numbers, and underscores only</div>
                     </div>
 
                     <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="Enter email address") }}
-                        {% if form.email.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.email.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
 
                     <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="Create a password") }}
-                        {% if form.password.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.password.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                        <small class="form-text text-muted">Minimum 8 characters</small>
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                               minlength="8" required>
+                        <div class="form-text">Minimum 8 characters</div>
                     </div>
 
                     <div class="mb-3">
-                        {{ form.confirm_password.label(class="form-label") }}
-                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Confirm password") }}
-                        {% if form.confirm_password.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.confirm_password.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                               minlength="8" required>
                     </div>
 
                     <div class="mb-3">
-                        {{ form.role.label(class="form-label") }}
-                        {{ form.role(class="form-select") }}
-                        <small class="form-text text-muted">Select your role in the system</small>
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="Staff" selected>Staff</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                        <div class="form-text">Select your role (Admin has full access)</div>
                     </div>
 
                     <div class="d-grid">
-                        {{ form.submit(class="btn btn-success btn-lg") }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i> Register
+                        </button>
                     </div>
                 </form>
-            </div>
-            <div class="card-footer text-center">
-                <small>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></small>
+
+                <hr>
+
+                <p class="text-center mb-0">
+                    Already have an account?
+                    <a href="{{ url_for('auth.login') }}">Login here</a>
+                </p>
             </div>
         </div>
     </div>

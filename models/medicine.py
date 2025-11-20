@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from models import db
 
 class Medicine(db.Model):
@@ -22,70 +22,74 @@ class Medicine(db.Model):
 
     # Relationships
     sales = db.relationship('Sale', backref='medicine', lazy='dynamic')
-    alternatives_as_primary = db.relationship(
+    alternatives_primary = db.relationship(
         'AlternativeMedicine',
         foreign_keys='AlternativeMedicine.primary_medicine_id',
         backref='primary_medicine',
         lazy='dynamic'
     )
-    alternatives_as_alternative = db.relationship(
+    alternatives_alternative = db.relationship(
         'AlternativeMedicine',
         foreign_keys='AlternativeMedicine.alternative_medicine_id',
         backref='alternative_medicine',
         lazy='dynamic'
     )
 
-    def __init__(self, name, manufacturer, category, quantity, price,
-                 expiry_date, barcode, description=None, stock=None, reorder_level=10):
-        self.name = name
-        self.description = description
-        self.manufacturer = manufacturer
-        self.category = category
-        self.quantity = quantity
-        self.price = price
-        self.expiry_date = expiry_date
-        self.stock = stock if stock is not None else quantity
-        self.reorder_level = reorder_level
-        self.barcode = barcode
+    # Valid categories
+    CATEGORIES = [
+        'Allergy',
+        'Cold and Mild Flu',
+        'Cough',
+        'Dermatology',
+        'Eye/ENT',
+        'Fever',
+        'Pain Relief',
+        'Vitamins',
+        'Women Hygiene'
+    ]
+
+    def __init__(self, **kwargs):
+        super(Medicine, self).__init__(**kwargs)
 
     def is_low_stock(self):
         """Check if medicine stock is below reorder level"""
         return self.stock <= self.reorder_level
 
     def is_expired(self):
-        """Check if medicine is expired"""
-        from datetime import date
+        """Check if medicine has expired"""
         return self.expiry_date < date.today()
 
     def is_expiring_soon(self, days=30):
-        """Check if medicine expires within specified days"""
-        from datetime import date, timedelta
-        return self.expiry_date <= (date.today() + timedelta(days=days))
+        """Check if medicine is expiring within specified days"""
+        from datetime import timedelta
+        return self.expiry_date <= date.today() + timedelta(days=days)
 
-    def update_stock(self, quantity_sold):
-        """Update stock after sale"""
-        if self.stock >= quantity_sold:
-            self.stock -= quantity_sold
-            return True
-        return False
-
-    def to_dict(self):
-        """Convert medicine to dictionary (for API responses)"""
-        return {
-            'medicine_id': self.medicine_id,
-            'name': self.name,
-            'description': self.description,
-            'manufacturer': self.manufacturer,
-            'category': self.category,
-            'quantity': self.quantity,
-            'price': float(self.price),
-            'expiry_date': self.expiry_date.isoformat(),
-            'stock': self.stock,
-            'reorder_level': self.reorder_level,
-            'barcode': self.barcode,
-            'is_low_stock': self.is_low_stock(),
-            'is_expired': self.is_expired()
-        }
+    def get_alternatives(self):
+        """Get list of alternative medicines"""
+        return AlternativeMedicine.query.filter_by(
+            primary_medicine_id=self.medicine_id
+        ).order_by(AlternativeMedicine.priority.desc()).all()
 
     def __repr__(self):
-        return f'<Medicine {self.name} (Stock: {self.stock})>'
+        return f'<Medicine {self.name} - {self.barcode}>'
+
+
+class AlternativeMedicine(db.Model):
+    """Alternative medicine mapping model"""
+
+    __tablename__ = 'alternative_medicine'
+
+    alternative_id = db.Column(db.Integer, primary_key=True)
+    primary_medicine_id = db.Column(db.Integer, db.ForeignKey('medicine.medicine_id'), nullable=False)
+    alternative_medicine_id = db.Column(db.Integer, db.ForeignKey('medicine.medicine_id'), nullable=False)
+    reason = db.Column(db.Text)
+    priority = db.Column(db.Integer, default=5)
+
+    # Unique constraint to prevent duplicate mappings
+    __table_args__ = (
+        db.UniqueConstraint('primary_medicine_id', 'alternative_medicine_id', name='unique_alternative'),
+        db.CheckConstraint('priority >= 1 AND priority <= 10', name='check_priority_range'),
+    )
+
+    def __repr__(self):
+        return f'<AlternativeMedicine primary={self.primary_medicine_id} alt={self.alternative_medicine_id}>'

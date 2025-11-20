@@ -1,9 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
+# Initialize extensions
 db = SQLAlchemy()
+login_manager = LoginManager()
 
-# Import models after db initialization to avoid circular imports
+# Import models after db is initialized
 from models.user import User
-from models.medicine import Medicine
+from models.medicine import Medicine, AlternativeMedicine
 from models.sale import Sale
-from models.alternative_medicine import AlternativeMedicine
+
+__all__ = ['db', 'login_manager', 'User', 'Medicine', 'AlternativeMedicine', 'Sale']

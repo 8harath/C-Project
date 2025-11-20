@@ -1,7 +1,7 @@
-from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from models import db
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+from models import db, login_manager
 
 class User(UserMixin, db.Model):
     """User model for authentication and authorization"""
@@ -12,11 +12,11 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False, index=True)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='Staff')
+    role = db.Column(db.String(20), nullable=False, default='Staff')  # Admin or Staff
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationship
-    sales = db.relationship('Sale', backref='seller', lazy='dynamic')
+    # Relationships
+    sales = db.relationship('Sale', backref='user', lazy='dynamic')
 
     def __init__(self, username, email, password, role='Staff'):
         self.username = username
@@ -25,12 +25,16 @@ class User(UserMixin, db.Model):
         self.role = role
 
     def set_password(self, password):
-        """Hash and set user password"""
-        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
+        """Hash and set the password"""
+        self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        """Check if provided password matches hash"""
+        """Check if the provided password matches the hash"""
         return check_password_hash(self.password_hash, password)
+
+    def get_id(self):
+        """Return the user ID as a string (required by Flask-Login)"""
+        return str(self.user_id)
 
     def is_admin(self):
         """Check if user has admin role"""
@@ -40,9 +44,11 @@ class User(UserMixin, db.Model):
         """Check if user has staff role"""
         return self.role == 'Staff'
 
-    def get_id(self):
-        """Required for Flask-Login"""
-        return str(self.user_id)
-
     def __repr__(self):
         return f'<User {self.username} ({self.role})>'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Load user by ID for Flask-Login"""
+    return User.query.get(int(user_id))

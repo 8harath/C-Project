@@ -1,6 +1,5 @@
-/* Custom Styles for Warehouse Inventory Management System */
+/* Custom styles for Warehouse Inventory Management System */
 
-/* Body and Main Layout */
 body {
     min-height: 100vh;
     display: flex;
@@ -11,143 +10,89 @@ main {
     flex: 1;
 }
 
-/* Navbar Enhancements */
-.navbar-brand {
-    font-weight: bold;
-    font-size: 1.3rem;
-}
-
-.navbar-brand i {
-    margin-right: 8px;
-}
-
-/* Card Enhancements */
+/* Card hover effects */
 .card {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
-
-/* Button Enhancements */
-.btn {
-    transition: all 0.3s ease;
-}
-
-.btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Alert Enhancements */
+/* Table styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+/* Low stock warning */
+.text-danger.fw-bold {
+    font-size: 1.1em;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Custom button spacing */
+.btn + .btn {
+    margin-left: 0.5rem;
+}
+
+/* Alert dismissible animation */
 .alert {
-    border-left: 4px solid;
-    border-radius: 0.5rem;
+    animation: slideInDown 0.3s ease-out;
 }
 
-.alert-success {
-    border-left-color: #28a745;
+@keyframes slideInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-.alert-danger {
-    border-left-color: #dc3545;
-}
-
-.alert-warning {
-    border-left-color: #ffc107;
-}
-
-.alert-info {
-    border-left-color: #17a2b8;
-}
-
-/* Form Enhancements */
-.form-control:focus,
-.form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-}
-
-/* Footer */
+/* Footer styling */
 footer {
     margin-top: auto;
 }
 
-footer a {
-    transition: color 0.3s ease;
+/* Chart container */
+canvas {
+    max-height: 400px;
 }
 
-footer a:hover {
-    color: #ffffff !important;
+/* Form validation styles */
+.was-validated .form-control:valid {
+    border-color: #28a745;
 }
 
-/* Loading Spinner */
-.spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
+.was-validated .form-control:invalid {
+    border-color: #dc3545;
 }
 
-/* Table Enhancements */
-.table {
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-/* Badge Enhancements */
-.badge {
-    font-weight: 500;
-    padding: 0.35em 0.65em;
-}
-
-/* Jumbotron Alternative (Bootstrap 5 removed jumbotron) */
-.jumbotron {
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-}
-
-/* Responsive adjustments */
+/* Responsive table */
 @media (max-width: 768px) {
-    .navbar-brand {
-        font-size: 1.1rem;
-    }
-
-    .card-body {
-        padding: 1rem;
+    .table-responsive {
+        font-size: 0.9em;
     }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Animation for page load */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
+/* Print styles */
+@media print {
+    .navbar, footer, .btn, .alert {
+        display: none !important;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.container {
-    animation: fadeIn 0.5s ease-in-out;
 }

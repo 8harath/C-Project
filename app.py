@@ -1,58 +1,52 @@
-from flask import Flask, render_template
-from flask_login import LoginManager
-from config import config
-from models import db
-from models.user import User
+import os
+from flask import Flask, render_template, redirect, url_for
+from config import Config
+from models import db, login_manager
 
-def create_app(config_name='default'):
+def create_app(config_class=Config):
     """Application factory pattern"""
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
+    app.config.from_object(config_class)
 
     # Initialize extensions
     db.init_app(app)
-
-    # Initialize Flask-Login
-    login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Please log in to access this page.'
     login_manager.login_message_category = 'info'
 
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
+    # Register blueprints
+    from routes.auth import auth_bp
+    from routes.admin import admin_bp
+    from routes.medicine import medicine_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(medicine_bp, url_prefix='/medicines')
 
     # Create database tables
     with app.app_context():
         db.create_all()
-        print("✓ Database tables created successfully")
-
-    # Register blueprints
-    from routes.auth import auth_bp
-    from routes.admin import admin_bp
-    from routes.staff import staff_bp
-    from routes.shared import shared_bp
-
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(staff_bp)
-    app.register_blueprint(shared_bp)
 
     # Home route
     @app.route('/')
-    def home():
+    def index():
+        """Home page"""
         return render_template('home.html')
+
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return render_template('errors/500.html'), 500
 
     return app
 
+
 if __name__ == '__main__':
-    app = create_app('development')
-    print("\n" + "="*50)
-    print("WAREHOUSE INVENTORY MANAGEMENT SYSTEM")
-    print("="*50)
-    print("Phase 1: Project Setup Complete ✓")
-    print("Phase 2: Authentication System Complete ✓")
-    print("Starting Flask Development Server...")
-    print("="*50 + "\n")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app = create_app()
+    app.run(debug=True, host='0.0.0.0', port=5000)
