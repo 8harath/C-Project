@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %}Products - Warehouse Manager{% endblock %}
+{% block title %}Manage Products - Warehouse Manager{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <h2><i class="fas fa-pills"></i> Products</h2>
-            <p class="text-muted">View all available medicines (Read Only)</p>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="fas fa-pills"></i> Manage Products</h2>
+                <a href="{{ url_for('admin.add_medicine') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add New Medicine
+                </a>
+            </div>
             <hr>
         </div>
     </div>
@@ -17,8 +21,8 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="GET" action="{{ url_for('shared.products') }}" class="row g-3">
-                        <div class="col-md-5">
+                    <form method="GET" action="{{ url_for('admin.manage_products') }}" class="row g-3">
+                        <div class="col-md-4">
                             {{ form.search.label(class="form-label") }}
                             {{ form.search(class="form-control", placeholder="Search by name or manufacturer") }}
                         </div>
@@ -26,7 +30,7 @@
                             {{ form.category.label(class="form-label") }}
                             {{ form.category(class="form-select") }}
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             {{ form.sort_by.label(class="form-label") }}
                             {{ form.sort_by(class="form-select") }}
                         </div>
@@ -56,8 +60,10 @@
                                     <th>Manufacturer</th>
                                     <th>Price (₹)</th>
                                     <th>Stock</th>
+                                    <th>Reorder Level</th>
                                     <th>Expiry Date</th>
                                     <th>Barcode</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,20 +85,34 @@
                                             <i class="fas fa-clock"></i> Expiring Soon
                                         </span>
                                         {% endif %}
-                                        {% if medicine.description %}
-                                        <br><small class="text-muted">{{ medicine.description[:80] }}{% if medicine.description|length > 80 %}...{% endif %}</small>
-                                        {% endif %}
                                     </td>
                                     <td><span class="badge bg-info">{{ medicine.category }}</span></td>
                                     <td>{{ medicine.manufacturer }}</td>
-                                    <td><strong>₹{{ "%.2f"|format(medicine.price) }}</strong></td>
+                                    <td>₹{{ "%.2f"|format(medicine.price) }}</td>
                                     <td>
                                         <span class="badge {% if medicine.is_low_stock() %}bg-danger{% else %}bg-success{% endif %}">
-                                            {{ medicine.stock }} units
+                                            {{ medicine.stock }}
                                         </span>
                                     </td>
+                                    <td>{{ medicine.reorder_level }}</td>
                                     <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
                                     <td><code>{{ medicine.barcode }}</code></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('admin.edit_medicine', medicine_id=medicine.medicine_id) }}"
+                                               class="btn btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST"
+                                                  action="{{ url_for('admin.delete_medicine', medicine_id=medicine.medicine_id) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Are you sure you want to delete {{ medicine.name }}?');">
+                                                <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -104,14 +124,14 @@
                     <nav aria-label="Medicine pagination">
                         <ul class="pagination justify-content-center">
                             <li class="page-item {% if not medicines.has_prev %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('shared.products', page=medicines.prev_num, search=form.search.data, category=form.category.data, sort_by=form.sort_by.data) }}">
+                                <a class="page-link" href="{{ url_for('admin.manage_products', page=medicines.prev_num, search=form.search.data, category=form.category.data, sort_by=form.sort_by.data) }}">
                                     Previous
                                 </a>
                             </li>
                             {% for page_num in medicines.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                                 {% if page_num %}
                                     <li class="page-item {% if page_num == medicines.page %}active{% endif %}">
-                                        <a class="page-link" href="{{ url_for('shared.products', page=page_num, search=form.search.data, category=form.category.data, sort_by=form.sort_by.data) }}">
+                                        <a class="page-link" href="{{ url_for('admin.manage_products', page=page_num, search=form.search.data, category=form.category.data, sort_by=form.sort_by.data) }}">
                                             {{ page_num }}
                                         </a>
                                     </li>
@@ -120,7 +140,7 @@
                                 {% endif %}
                             {% endfor %}
                             <li class="page-item {% if not medicines.has_next %}disabled{% endif %}">
-                                <a class="page-link" href="{{ url_for('shared.products', page=medicines.next_num, search=form.search.data, category=form.category.data, sort_by=form.sort_by.data) }}">
+                                <a class="page-link" href="{{ url_for('admin.manage_products', page=medicines.next_num, search=form.search.data, category=form.category.data, sort_by=form.sort_by.data) }}">
                                     Next
                                 </a>
                             </li>
@@ -136,7 +156,11 @@
             {% else %}
             <div class="alert alert-info">
                 <h4 class="alert-heading"><i class="fas fa-info-circle"></i> No Medicines Found</h4>
-                <p>No medicines match your search criteria. Try adjusting your filters.</p>
+                <p>No medicines match your search criteria. Try adjusting your filters or add a new medicine.</p>
+                <hr>
+                <a href="{{ url_for('admin.add_medicine') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add First Medicine
+                </a>
             </div>
             {% endif %}
         </div>
