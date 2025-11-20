@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Warehouse Inventory Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 mb-4">
+            <i class="bi bi-hospital text-primary"></i>
+            Warehouse & Inventory Management System
+        </h1>
+        <p class="lead mb-4">
+            A comprehensive pharmaceutical inventory management solution for tracking medicines, recording sales,
+            and generating analytical insights.
+        </p>
+
+        {% if not current_user.is_authenticated %}
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-person-plus"></i> Register
+            </a>
+        </div>
+        {% else %}
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+            <a href="{% if current_user.is_admin() %}{{ url_for('admin.dashboard') }}{% else %}{{ url_for('admin.staff_dashboard') }}{% endif %}"
+               class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-speedometer2"></i> Go to Dashboard
+            </a>
+            <a href="{{ url_for('medicine.list_medicines') }}" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-capsule"></i> View Medicines
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-capsule display-3 text-primary mb-3"></i>
+                <h5 class="card-title">Medicine Management</h5>
+                <p class="card-text">
+                    Comprehensive CRUD operations for managing medicine inventory with barcode support.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-bar-chart-line display-3 text-success mb-3"></i>
+                <h5 class="card-title">Analytics & Reports</h5>
+                <p class="card-text">
+                    Generate insights with sales analytics, seasonal forecasts, and predictive reports.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-bell display-3 text-warning mb-3"></i>
+                <h5 class="card-title">Smart Alerts</h5>
+                <p class="card-text">
+                    Get notified about low stock levels and expiring medicines automatically.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> About the Team</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">This system was developed by:</p>
+                <ul>
+                    <li><strong>Chandralekha S</strong></li>
+                    <li><strong>Akshaya N</strong></li>
+                    <li><strong>S Sridevi</strong></li>
+                </ul>
+                <p class="mb-0">
+                    <i class="bi bi-envelope"></i> <strong>Contact:</strong> chandralekha508@gmail.com |
+                    <i class="bi bi-phone"></i> +91 7022897595
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

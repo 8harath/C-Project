@@ -1,0 +1,98 @@
+/* Custom styles for Warehouse Inventory Management System */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Table styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+/* Low stock warning */
+.text-danger.fw-bold {
+    font-size: 1.1em;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Custom button spacing */
+.btn + .btn {
+    margin-left: 0.5rem;
+}
+
+/* Alert dismissible animation */
+.alert {
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Chart container */
+canvas {
+    max-height: 400px;
+}
+
+/* Form validation styles */
+.was-validated .form-control:valid {
+    border-color: #28a745;
+}
+
+.was-validated .form-control:invalid {
+    border-color: #dc3545;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9em;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar, footer, .btn, .alert {
+        display: none !important;
+    }
+}
