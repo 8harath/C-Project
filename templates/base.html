@@ -46,6 +46,23 @@
                                 <i class="bi bi-capsule"></i> Medicines
                             </a>
                         </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="salesDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-cart-plus"></i> Sales
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('sales.sell_medicines') }}">
+                                    <i class="bi bi-cart-plus"></i> Sell Medicines
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('sales.scan') }}">
+                                    <i class="bi bi-upc-scan"></i> Barcode Scanner
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('sales.sales_history') }}">
+                                    <i class="bi bi-clock-history"></i> Sales History
+                                </a></li>
+                            </ul>
+                        </li>
                     {% endif %}
                 </ul>
 
