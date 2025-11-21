@@ -26,9 +26,26 @@ def create_app(config_class=Config):
     app.register_blueprint(medicine_bp, url_prefix='/medicines')
     app.register_blueprint(sales_bp)
 
-    # Create database tables
+    # Create database tables and auto-seed if empty
     with app.app_context():
         db.create_all()
+
+        # Auto-seed database if empty (for easy deployment)
+        from models.user import User
+        from models.medicine import Medicine
+
+        if User.query.count() == 0 and Medicine.query.count() == 0:
+            print("🌱 Database is empty. Auto-seeding with sample data...")
+            try:
+                # Import and run seed functions
+                from seed_database import seed_users, seed_medicines, seed_alternatives
+                seed_users()
+                seed_medicines()
+                seed_alternatives()
+                print("✅ Database seeded successfully!")
+            except Exception as e:
+                print(f"⚠️  Auto-seed failed: {e}")
+                print("💡 You can manually seed with: python seed_database.py")
 
     # Home route
     @app.route('/')
