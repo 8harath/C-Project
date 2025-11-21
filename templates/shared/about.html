@@ -4,27 +4,50 @@
 
 {% block content %}
 <div class="container">
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12 text-center">
-            <h1 class="display-4"><i class="bi bi-info-circle-fill text-primary"></i> About Us</h1>
-            <p class="lead text-muted">Comprehensive Pharmaceutical Inventory Management Solution</p>
-            <hr class="my-4">
+            <h1 class="display-3 fw-bold mb-3"><i class="bi bi-info-circle-fill text-primary"></i> About This Project</h1>
+            <p class="lead text-muted fs-4">Comprehensive Pharmaceutical Inventory Management Solution</p>
+            <div class="badge bg-primary fs-6 px-4 py-2 mt-3">
+                <i class="bi bi-mortarboard-fill"></i> Academic Capstone Project
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Overview -->
+    <div class="row mt-5 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg mb-4">
+                <div class="card-body p-5">
+                    <h3 class="fw-bold mb-4"><i class="bi bi-star-fill text-warning"></i> Project Overview</h3>
+                    <p class="lead mb-3">
+                        This Warehouse and Inventory Management System is a comprehensive pharmaceutical solution
+                        developed as an academic capstone project to demonstrate real-world software engineering skills
+                        and industry best practices.
+                    </p>
+                    <p class="text-muted">
+                        The system showcases the application of modern web development technologies, database design,
+                        user interface design, and business logic implementation to solve practical inventory management
+                        challenges faced by pharmaceutical operations.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- System Description -->
     <div class="row mt-4">
         <div class="col-lg-8">
-            <h3>Warehouse and Inventory Management System</h3>
+            <h3 class="fw-bold mb-3"><i class="bi bi-hospital text-primary"></i> System Description</h3>
             <p class="lead">
-                A comprehensive pharmaceutical inventory management solution designed to streamline
+                A production-ready pharmaceutical inventory management solution designed to streamline
                 medicine tracking, sales recording, and analytical insights.
             </p>
             <p>
-                Our system enables role-based access for administrators and staff to efficiently manage
+                The system enables role-based access for administrators and staff to efficiently manage
                 medicine inventory, record sales transactions through barcode scanning, and generate
                 valuable analytical reports. With features like low stock alerts, seasonal forecasting,
-                and alternative medicine recommendations, we help pharmacies maintain optimal inventory
+                and alternative medicine recommendations, the application helps pharmacies maintain optimal inventory
                 levels and improve customer service.
             </p>
             <p>
@@ -53,42 +76,63 @@
         </div>
     </div>
 
+    <!-- Academic Context -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3"><i class="bi bi-mortarboard-fill text-primary"></i> Academic Context</h4>
+                    <p class="mb-2">
+                        <strong>Project Type:</strong> Capstone Project<br>
+                        <strong>Purpose:</strong> Demonstrate software engineering skills and practical application of academic learning<br>
+                        <strong>Scope:</strong> Full-stack web application with database management, user authentication, and analytics
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Team Section -->
     <div class="row mt-5">
         <div class="col-12">
-            <h3><i class="bi bi-people-fill"></i> Development Team</h3>
-            <hr>
+            <h3 class="fw-bold mb-4"><i class="bi bi-people-fill text-primary"></i> Development Team</h3>
         </div>
     </div>
 
     <div class="row mt-3">
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-person-circle" style="font-size: 4rem; color: #0d6efd;"></i>
-                    <h5 class="card-title mt-3">Chandralekha S</h5>
-                    <p class="text-muted">Project Lead & Developer</p>
-                    <p class="small">Leading the development and architecture of the warehouse management system</p>
+            <div class="card text-center border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="feature-icon-wrapper mb-3" style="width: 100px; height: 100px; margin: 0 auto;">
+                        <i class="bi bi-person-circle display-4 text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mt-3">Chandralekha S</h5>
+                    <p class="text-muted mb-2">Project Lead & Developer</p>
+                    <p class="small text-muted">Leading the development and architecture of the warehouse management system</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-person-circle" style="font-size: 4rem; color: #198754;"></i>
-                    <h5 class="card-title mt-3">Akshaya N</h5>
-                    <p class="text-muted">Developer & Designer</p>
-                    <p class="small">Contributing to system development and user interface design</p>
+            <div class="card text-center border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="feature-icon-wrapper mb-3" style="width: 100px; height: 100px; margin: 0 auto;">
+                        <i class="bi bi-person-circle display-4 text-success"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mt-3">Akshaya N</h5>
+                    <p class="text-muted mb-2">Developer & Designer</p>
+                    <p class="small text-muted">Contributing to system development and user interface design</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-person-circle" style="font-size: 4rem; color: #0dcaf0;"></i>
-                    <h5 class="card-title mt-3">S Sridevi</h5>
-                    <p class="text-muted">Developer & Tester</p>
-                    <p class="small">Contributing to system features and quality assurance</p>
+            <div class="card text-center border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="feature-icon-wrapper mb-3" style="width: 100px; height: 100px; margin: 0 auto;">
+                        <i class="bi bi-person-circle display-4 text-info"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mt-3">S Sridevi</h5>
+                    <p class="text-muted mb-2">Developer & Tester</p>
+                    <p class="small text-muted">Contributing to system features and quality assurance</p>
                 </div>
             </div>
         </div>
@@ -97,42 +141,41 @@
     <!-- Technology Stack -->
     <div class="row mt-5">
         <div class="col-12">
-            <h3><i class="bi bi-code-square"></i> Technology Stack</h3>
-            <hr>
+            <h3 class="fw-bold mb-4"><i class="bi bi-code-square text-primary"></i> Technology Stack</h3>
         </div>
     </div>
 
     <div class="row mt-3">
         <div class="col-md-6 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Backend Technologies</h5>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header border-0">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-server text-info"></i> Backend Technologies</h5>
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled">
-                        <li><i class="bi bi-dot"></i> Python 3.8+</li>
-                        <li><i class="bi bi-dot"></i> Flask 2.3.3</li>
-                        <li><i class="bi bi-dot"></i> SQLAlchemy ORM</li>
-                        <li><i class="bi bi-dot"></i> SQLite Database</li>
-                        <li><i class="bi bi-dot"></i> Flask-Login for Authentication</li>
-                        <li><i class="bi bi-dot"></i> WTForms for Form Handling</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Python 3.8+</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Flask 2.3.3</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> SQLAlchemy ORM</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> SQLite Database</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Flask-Login for Authentication</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> WTForms for Form Handling</li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="col-md-6 mb-3">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Frontend Technologies</h5>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header border-0">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-palette text-success"></i> Frontend Technologies</h5>
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled">
-                        <li><i class="bi bi-dot"></i> Bootstrap 5.3.0</li>
-                        <li><i class="bi bi-dot"></i> Chart.js 4.4.0</li>
-                        <li><i class="bi bi-dot"></i> Bootstrap Icons</li>
-                        <li><i class="bi bi-dot"></i> Responsive Design</li>
-                        <li><i class="bi bi-dot"></i> Modern JavaScript</li>
-                        <li><i class="bi bi-dot"></i> Jinja2 Templating</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Bootstrap 5.3.0</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Chart.js 4.4.0</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Bootstrap Icons</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Responsive Design</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Modern JavaScript</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success"></i> Jinja2 Templating</li>
                     </ul>
                 </div>
             </div>
@@ -142,19 +185,20 @@
     <!-- Contact Section -->
     <div class="row mt-5">
         <div class="col-12">
-            <h3><i class="bi bi-envelope-fill"></i> Contact Information</h3>
-            <hr>
+            <h3 class="fw-bold mb-4"><i class="bi bi-envelope-fill text-primary"></i> Contact Information</h3>
         </div>
     </div>
 
     <div class="row mt-3 mb-5">
         <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-envelope" style="font-size: 3rem; color: #0d6efd;"></i>
-                    <h5 class="card-title mt-3">Email</h5>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3" style="width: 80px; height: 80px; margin: 0 auto;">
+                        <i class="bi bi-envelope display-4 text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mt-3">Email</h5>
                     <p class="card-text">
-                        <a href="mailto:chandralekha508@gmail.com" class="text-decoration-none">
+                        <a href="mailto:chandralekha508@gmail.com" class="text-decoration-none text-primary">
                             chandralekha508@gmail.com
                         </a>
                     </p>
@@ -162,12 +206,14 @@
             </div>
         </div>
         <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-telephone" style="font-size: 3rem; color: #198754;"></i>
-                    <h5 class="card-title mt-3">Phone</h5>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3" style="width: 80px; height: 80px; margin: 0 auto;">
+                        <i class="bi bi-telephone display-4 text-success"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mt-3">Phone</h5>
                     <p class="card-text">
-                        <a href="tel:+917022897595" class="text-decoration-none">
+                        <a href="tel:+917022897595" class="text-decoration-none text-success">
                             +91 7022897595
                         </a>
                     </p>

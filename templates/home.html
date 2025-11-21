@@ -3,95 +3,153 @@
 {% block title %}Home - Warehouse Inventory Management{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto text-center">
-        <h1 class="display-4 mb-4">
-            <i class="bi bi-hospital text-primary"></i>
-            Warehouse & Inventory Management System
-        </h1>
-        <p class="lead mb-4">
-            A comprehensive pharmaceutical inventory management solution for tracking medicines, recording sales,
-            and generating analytical insights.
-        </p>
+<!-- Hero Section -->
+<div class="row mb-5">
+    <div class="col-lg-10 mx-auto text-center">
+        <div class="hero-section py-5">
+            <h1 class="display-3 fw-bold mb-4 text-primary">
+                <i class="bi bi-hospital"></i>
+                Pharmaceutical Inventory Management
+            </h1>
+            <p class="lead mb-4 text-muted fs-4">
+                A comprehensive solution for efficient medicine tracking, intelligent sales management,
+                and data-driven analytics for modern pharmaceutical operations.
+            </p>
 
-        {% if not current_user.is_authenticated %}
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 gap-3">
-                <i class="bi bi-box-arrow-in-right"></i> Login
-            </a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4">
-                <i class="bi bi-person-plus"></i> Register
-            </a>
-        </div>
-        {% else %}
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
-            <a href="{% if current_user.is_admin() %}{{ url_for('admin.dashboard') }}{% else %}{{ url_for('admin.staff_dashboard') }}{% endif %}"
-               class="btn btn-primary btn-lg px-4">
-                <i class="bi bi-speedometer2"></i> Go to Dashboard
-            </a>
-            <a href="{{ url_for('medicine.list_medicines') }}" class="btn btn-outline-secondary btn-lg px-4">
-                <i class="bi bi-capsule"></i> View Medicines
-            </a>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<div class="row mt-5">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body">
-                <i class="bi bi-capsule display-3 text-primary mb-3"></i>
-                <h5 class="card-title">Medicine Management</h5>
-                <p class="card-text">
-                    Comprehensive CRUD operations for managing medicine inventory with barcode support.
-                </p>
+            {% if not current_user.is_authenticated %}
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center mt-5">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-5 py-3 shadow-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign In
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg px-5 py-3">
+                    <i class="bi bi-person-plus"></i> Create Account
+                </a>
             </div>
-        </div>
-    </div>
-
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body">
-                <i class="bi bi-bar-chart-line display-3 text-success mb-3"></i>
-                <h5 class="card-title">Analytics & Reports</h5>
-                <p class="card-text">
-                    Generate insights with sales analytics, seasonal forecasts, and predictive reports.
-                </p>
+            {% else %}
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center mt-5">
+                <a href="{% if current_user.is_admin() %}{{ url_for('admin.dashboard') }}{% else %}{{ url_for('admin.staff_dashboard') }}{% endif %}"
+                   class="btn btn-primary btn-lg px-5 py-3 shadow-lg">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('medicine.list_medicines') }}" class="btn btn-outline-primary btn-lg px-5 py-3">
+                    <i class="bi bi-capsule"></i> Browse Medicines
+                </a>
             </div>
-        </div>
-    </div>
-
-    <div class="col-md-4 mb-4">
-        <div class="card h-100 text-center">
-            <div class="card-body">
-                <i class="bi bi-bell display-3 text-warning mb-3"></i>
-                <h5 class="card-title">Smart Alerts</h5>
-                <p class="card-text">
-                    Get notified about low stock levels and expiring medicines automatically.
-                </p>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-lg-10 mx-auto">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle"></i> About the Team</h5>
-            </div>
-            <div class="card-body">
-                <p class="mb-3">This system was developed by:</p>
-                <ul>
-                    <li><strong>Chandralekha S</strong></li>
-                    <li><strong>Akshaya N</strong></li>
-                    <li><strong>S Sridevi</strong></li>
-                </ul>
-                <p class="mb-0">
-                    <i class="bi bi-envelope"></i> <strong>Contact:</strong> chandralekha508@gmail.com |
-                    <i class="bi bi-phone"></i> +91 7022897595
+<!-- Features Section -->
+<div class="row mt-5 mb-4">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold">Core Features</h2>
+        <p class="text-muted">Powerful tools to streamline your pharmacy operations</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm feature-card">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon-wrapper mb-4">
+                    <i class="bi bi-capsule display-3 text-primary"></i>
+                </div>
+                <h4 class="card-title fw-bold mb-3">Medicine Management</h4>
+                <p class="card-text text-muted">
+                    Complete inventory control with barcode scanning, stock tracking,
+                    and automated reorder alerts for seamless operations.
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm feature-card">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon-wrapper mb-4">
+                    <i class="bi bi-bar-chart-line display-3 text-success"></i>
+                </div>
+                <h4 class="card-title fw-bold mb-3">Analytics & Insights</h4>
+                <p class="card-text text-muted">
+                    Advanced reporting with sales trends, seasonal forecasting,
+                    and predictive analytics to optimize your inventory decisions.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm feature-card">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon-wrapper mb-4">
+                    <i class="bi bi-bell display-3 text-warning"></i>
+                </div>
+                <h4 class="card-title fw-bold mb-3">Smart Notifications</h4>
+                <p class="card-text text-muted">
+                    Real-time alerts for low stock levels, expiring medicines,
+                    and critical inventory events to keep you informed.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Features -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-shield-check display-4 text-info mb-3"></i>
+                <h5 class="fw-bold">Role-Based Access</h5>
+                <p class="text-muted small mb-0">Secure user management with admin and staff roles</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-upc-scan display-4 text-primary mb-3"></i>
+                <h5 class="fw-bold">Barcode Scanning</h5>
+                <p class="text-muted small mb-0">Fast and accurate medicine identification</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-graph-up display-4 text-success mb-3"></i>
+                <h5 class="fw-bold">Sales Tracking</h5>
+                <p class="text-muted small mb-0">Comprehensive sales history and reporting</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm text-center p-3">
+            <div class="card-body">
+                <i class="bi bi-files display-4 text-warning mb-3"></i>
+                <h5 class="fw-bold">Export & Reports</h5>
+                <p class="text-muted small mb-0">Download data in CSV format for analysis</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="row mt-5 mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-primary text-white border-0 shadow-lg">
+            <div class="card-body text-center p-5">
+                <h3 class="fw-bold mb-3">Ready to streamline your pharmacy operations?</h3>
+                <p class="lead mb-4">
+                    Join us today and experience efficient inventory management with powerful analytics.
+                </p>
+                <a href="{{ url_for('shared.about') }}" class="btn btn-light btn-lg px-5">
+                    <i class="bi bi-info-circle"></i> Learn More
+                </a>
             </div>
         </div>
     </div>
