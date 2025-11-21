@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, make_response
 from flask_login import login_required, current_user
 from models import db
-from models.medicine import Medicine
+from models.medicine import Medicine, AlternativeMedicine
 from models.sale import Sale
 from models.user import User
 from routes.decorators import admin_required, staff_required
@@ -416,3 +416,184 @@ def export_reports():
     response.headers['Content-Type'] = 'text/csv'
 
     return response
+
+
+@admin_bp.route('/alternatives')
+@admin_required
+def alternatives():
+    """Manage alternative medicine mappings"""
+
+    # Get search parameter
+    search = request.args.get('search', '')
+
+    # Base query - join with medicine tables to get names
+    query = db.session.query(
+        AlternativeMedicine.alternative_id,
+        AlternativeMedicine.primary_medicine_id,
+        AlternativeMedicine.alternative_medicine_id,
+        AlternativeMedicine.reason,
+        AlternativeMedicine.priority,
+        Medicine.name.label('primary_name'),
+        Medicine.category.label('primary_category')
+    ).join(
+        Medicine,
+        Medicine.medicine_id == AlternativeMedicine.primary_medicine_id
+    )
+
+    # Apply search filter
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(Medicine.name.ilike(search_term))
+
+    # Order by primary medicine name and priority
+    query = query.order_by(Medicine.name, AlternativeMedicine.priority)
+
+    # Get all alternative mappings
+    alternatives_data = query.all()
+
+    # Group alternatives by primary medicine
+    alternatives_grouped = defaultdict(list)
+    for alt in alternatives_data:
+        alternative_med = Medicine.query.get(alt.alternative_medicine_id)
+        alternatives_grouped[alt.primary_medicine_id].append({
+            'alternative_id': alt.alternative_id,
+            'primary_id': alt.primary_medicine_id,
+            'primary_name': alt.primary_name,
+            'primary_category': alt.primary_category,
+            'alternative_id_fk': alt.alternative_medicine_id,
+            'alternative_name': alternative_med.name if alternative_med else 'Unknown',
+            'alternative_category': alternative_med.category if alternative_med else 'Unknown',
+            'reason': alt.reason,
+            'priority': alt.priority
+        })
+
+    # Pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+
+    # Convert to list for pagination
+    alternatives_list = []
+    for primary_id, alts in alternatives_grouped.items():
+        alternatives_list.append({
+            'primary_id': primary_id,
+            'primary_name': alts[0]['primary_name'],
+            'primary_category': alts[0]['primary_category'],
+            'alternatives': alts
+        })
+
+    # Simple pagination
+    total = len(alternatives_list)
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_alternatives = alternatives_list[start:end]
+
+    has_prev = page > 1
+    has_next = end < total
+    total_pages = (total + per_page - 1) // per_page
+
+    return render_template('admin/alternatives.html',
+                           alternatives=paginated_alternatives,
+                           search=search,
+                           page=page,
+                           has_prev=has_prev,
+                           has_next=has_next,
+                           total_pages=total_pages)
+
+
+@admin_bp.route('/alternatives/add', methods=['GET', 'POST'])
+@admin_required
+def add_alternative():
+    """Add new alternative medicine mapping"""
+
+    if request.method == 'POST':
+        primary_medicine_id = request.form.get('primary_medicine_id')
+        alternative_medicine_id = request.form.get('alternative_medicine_id')
+        reason = request.form.get('reason', '')
+        priority = request.form.get('priority', 5, type=int)
+
+        # Validation
+        if not primary_medicine_id or not alternative_medicine_id:
+            flash('Both primary and alternative medicines must be selected', 'danger')
+            return redirect(url_for('admin.add_alternative'))
+
+        if primary_medicine_id == alternative_medicine_id:
+            flash('A medicine cannot be an alternative to itself', 'danger')
+            return redirect(url_for('admin.add_alternative'))
+
+        # Check if mapping already exists
+        existing = AlternativeMedicine.query.filter_by(
+            primary_medicine_id=primary_medicine_id,
+            alternative_medicine_id=alternative_medicine_id
+        ).first()
+
+        if existing:
+            flash('This alternative mapping already exists', 'warning')
+            return redirect(url_for('admin.alternatives'))
+
+        # Create new mapping
+        alternative = AlternativeMedicine(
+            primary_medicine_id=primary_medicine_id,
+            alternative_medicine_id=alternative_medicine_id,
+            reason=reason,
+            priority=priority
+        )
+
+        db.session.add(alternative)
+        db.session.commit()
+
+        primary_med = Medicine.query.get(primary_medicine_id)
+        alt_med = Medicine.query.get(alternative_medicine_id)
+
+        flash(f'Alternative mapping added: {primary_med.name} → {alt_med.name}', 'success')
+        return redirect(url_for('admin.alternatives'))
+
+    # GET request - show form
+    medicines = Medicine.query.order_by(Medicine.name).all()
+    return render_template('admin/add_alternative.html', medicines=medicines)
+
+
+@admin_bp.route('/alternatives/edit/<int:alternative_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_alternative(alternative_id):
+    """Edit existing alternative medicine mapping"""
+
+    alternative = AlternativeMedicine.query.get_or_404(alternative_id)
+
+    if request.method == 'POST':
+        reason = request.form.get('reason', '')
+        priority = request.form.get('priority', 5, type=int)
+
+        # Update mapping
+        alternative.reason = reason
+        alternative.priority = priority
+
+        db.session.commit()
+
+        flash('Alternative mapping updated successfully', 'success')
+        return redirect(url_for('admin.alternatives'))
+
+    # GET request - show form
+    primary_med = Medicine.query.get(alternative.primary_medicine_id)
+    alt_med = Medicine.query.get(alternative.alternative_medicine_id)
+
+    return render_template('admin/edit_alternative.html',
+                           alternative=alternative,
+                           primary_med=primary_med,
+                           alt_med=alt_med)
+
+
+@admin_bp.route('/alternatives/delete/<int:alternative_id>', methods=['POST'])
+@admin_required
+def delete_alternative(alternative_id):
+    """Delete alternative medicine mapping"""
+
+    alternative = AlternativeMedicine.query.get_or_404(alternative_id)
+
+    primary_med = Medicine.query.get(alternative.primary_medicine_id)
+    alt_med = Medicine.query.get(alternative.alternative_medicine_id)
+
+    db.session.delete(alternative)
+    db.session.commit()
+
+    flash(f'Alternative mapping deleted: {primary_med.name} → {alt_med.name}', 'success')
+    return redirect(url_for('admin.alternatives'))
