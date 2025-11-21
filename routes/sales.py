@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from models import db
-from models.medicine import Medicine
+from models.medicine import Medicine, AlternativeMedicine
 from models.sale import Sale
 from forms.sale_forms import SaleForm, BarcodeSaleForm, ManualBarcodeForm
 from routes.decorators import staff_required
@@ -9,6 +9,22 @@ from datetime import datetime, date
 from decimal import Decimal
 
 sales_bp = Blueprint('sales', __name__)
+
+def get_available_alternatives(medicine):
+    """Get list of available alternative medicines (in stock and not expired)"""
+    alternatives = medicine.get_alternatives()
+    available_alternatives = []
+
+    for alt in alternatives:
+        alt_medicine = Medicine.query.get(alt.alternative_medicine_id)
+        if alt_medicine and alt_medicine.stock > 0 and not alt_medicine.is_expired():
+            available_alternatives.append({
+                'medicine': alt_medicine,
+                'reason': alt.reason,
+                'priority': alt.priority
+            })
+
+    return available_alternatives
 
 @sales_bp.route('/sell', methods=['GET', 'POST'])
 @login_required
@@ -30,11 +46,25 @@ def sell_medicines():
             # Validate stock
             if medicine.stock < form.quantity.data:
                 flash(f'Insufficient stock. Only {medicine.stock} units available.', 'danger')
+
+                # Suggest alternatives
+                alternatives = get_available_alternatives(medicine)
+                if alternatives:
+                    alt_names = [alt['medicine'].name for alt in alternatives[:3]]
+                    flash(f'Alternative medicines available: {", ".join(alt_names)}', 'info')
+
                 return redirect(url_for('sales.sell_medicines'))
 
             # Validate expiry
             if medicine.is_expired():
                 flash(f'{medicine.name} has expired and cannot be sold.', 'danger')
+
+                # Suggest alternatives
+                alternatives = get_available_alternatives(medicine)
+                if alternatives:
+                    alt_names = [alt['medicine'].name for alt in alternatives[:3]]
+                    flash(f'Alternative medicines available: {", ".join(alt_names)}', 'info')
+
                 return redirect(url_for('sales.sell_medicines'))
 
             # Calculate total price
@@ -126,19 +156,45 @@ def sell_by_barcode():
 
     # Validate stock
     if medicine.stock < quantity:
+        # Suggest alternatives
+        alternatives = get_available_alternatives(medicine)
+        alternative_info = []
+        if alternatives:
+            alternative_info = [{'name': alt['medicine'].name, 'id': alt['medicine'].medicine_id} for alt in alternatives[:3]]
+
         if request.is_json:
-            return jsonify({
+            response = {
                 'error': f'Insufficient stock. Only {medicine.stock} units available.',
                 'available_stock': medicine.stock
-            }), 400
+            }
+            if alternative_info:
+                response['alternatives'] = alternative_info
+            return jsonify(response), 400
+
         flash(f'Insufficient stock. Only {medicine.stock} units available.', 'danger')
+        if alternative_info:
+            alt_names = [alt['name'] for alt in alternative_info]
+            flash(f'Alternative medicines available: {", ".join(alt_names)}', 'info')
         return redirect(url_for('sales.scan'))
 
     # Validate expiry
     if medicine.is_expired():
+        # Suggest alternatives
+        alternatives = get_available_alternatives(medicine)
+        alternative_info = []
+        if alternatives:
+            alternative_info = [{'name': alt['medicine'].name, 'id': alt['medicine'].medicine_id} for alt in alternatives[:3]]
+
         if request.is_json:
-            return jsonify({'error': f'{medicine.name} has expired and cannot be sold.'}), 400
+            response = {'error': f'{medicine.name} has expired and cannot be sold.'}
+            if alternative_info:
+                response['alternatives'] = alternative_info
+            return jsonify(response), 400
+
         flash(f'{medicine.name} has expired and cannot be sold.', 'danger')
+        if alternative_info:
+            alt_names = [alt['name'] for alt in alternative_info]
+            flash(f'Alternative medicines available: {", ".join(alt_names)}', 'info')
         return redirect(url_for('sales.scan'))
 
     try:

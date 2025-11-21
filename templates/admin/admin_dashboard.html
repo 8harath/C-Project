@@ -192,28 +192,43 @@
                                 <th>Current Stock</th>
                                 <th>Reorder Level</th>
                                 <th>Expiry Date</th>
+                                <th>Alternatives Available</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for medicine in low_stock_medicines %}
-                            <tr {% if medicine.stock == 0 %}class="table-danger"{% endif %}>
+                            {% for item in low_stock_medicines %}
+                            {% set med = item.medicine %}
+                            {% set alternatives = item.alternatives %}
+                            <tr {% if med.stock == 0 %}class="table-danger"{% endif %}>
                                 <td>
-                                    <strong>{{ medicine.name }}</strong>
-                                    {% if medicine.stock == 0 %}
+                                    <strong>{{ med.name }}</strong>
+                                    {% if med.stock == 0 %}
                                         <span class="badge bg-danger">Out of Stock</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ medicine.category }}</td>
+                                <td>{{ med.category }}</td>
                                 <td>
-                                    <span class="badge {% if medicine.stock == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
-                                        {{ medicine.stock }}
+                                    <span class="badge {% if med.stock == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                        {{ med.stock }}
                                     </span>
                                 </td>
-                                <td>{{ medicine.reorder_level }}</td>
-                                <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ med.reorder_level }}</td>
+                                <td>{{ med.expiry_date.strftime('%Y-%m-%d') }}</td>
                                 <td>
-                                    <a href="{{ url_for('medicine.edit_medicine', medicine_id=medicine.medicine_id) }}"
+                                    {% if alternatives %}
+                                        <small class="text-success">
+                                            <i class="bi bi-check-circle"></i>
+                                            {% for alt in alternatives %}
+                                                <div>• {{ alt.medicine.name }} ({{ alt.medicine.stock }} in stock)</div>
+                                            {% endfor %}
+                                        </small>
+                                    {% else %}
+                                        <small class="text-muted"><i class="bi bi-x-circle"></i> None</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('medicine.edit_medicine', medicine_id=med.medicine_id) }}"
                                        class="btn btn-sm btn-primary">
                                         <i class="bi bi-pencil"></i> Restock
                                     </a>

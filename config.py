@@ -30,3 +30,11 @@ class Config:
 
     # Upload settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+
+
+class TestingConfig(Config):
+    """Testing configuration"""
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # In-memory database for testing
+    WTF_CSRF_ENABLED = False  # Disable CSRF for testing
+    SECRET_KEY = 'test-secret-key'
