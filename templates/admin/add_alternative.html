@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Alternative Medicine - Warehouse Inventory{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Add Alternative Medicine Mapping</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_alternative') }}" id="alternativeForm">
+                        <div class="mb-3">
+                            <label for="primary_medicine_id" class="form-label">
+                                Primary Medicine <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="primary_medicine_id" name="primary_medicine_id" required>
+                                <option value="">-- Select Primary Medicine --</option>
+                                {% for medicine in medicines %}
+                                <option value="{{ medicine.medicine_id }}">
+                                    {{ medicine.name }} ({{ medicine.category }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                The medicine for which you want to add an alternative
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="alternative_medicine_id" class="form-label">
+                                Alternative Medicine <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="alternative_medicine_id" name="alternative_medicine_id" required>
+                                <option value="">-- Select Alternative Medicine --</option>
+                                {% for medicine in medicines %}
+                                <option value="{{ medicine.medicine_id }}">
+                                    {{ medicine.name }} ({{ medicine.category }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                The medicine that can be used as an alternative
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3"
+                                      placeholder="e.g., Same active ingredient, Similar therapeutic effect, etc."></textarea>
+                            <small class="form-text text-muted">
+                                Explain why this is a suitable alternative (optional)
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <input type="number" class="form-control" id="priority" name="priority"
+                                   min="1" max="10" value="5" required>
+                            <small class="form-text text-muted">
+                                Priority level (1-10, lower number = higher priority)
+                            </small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Note:</strong> Alternative medicines help staff find substitutes when a medicine is out of stock or unavailable.
+                            Priority determines the order in which alternatives are suggested.
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('admin.alternatives') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Add Mapping
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation
+document.getElementById('alternativeForm').addEventListener('submit', function(e) {
+    const primaryId = document.getElementById('primary_medicine_id').value;
+    const alternativeId = document.getElementById('alternative_medicine_id').value;
+
+    if (primaryId === alternativeId) {
+        e.preventDefault();
+        alert('A medicine cannot be an alternative to itself. Please select different medicines.');
+        return false;
+    }
+
+    if (!primaryId || !alternativeId) {
+        e.preventDefault();
+        alert('Please select both primary and alternative medicines.');
+        return false;
+    }
+});
+</script>
+{% endblock %}
