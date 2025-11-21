@@ -64,10 +64,27 @@ def dashboard():
         Medicine.expiry_date <= (datetime.now().date() + timedelta(days=30))
     ).count()
 
-    # Low stock medicines
-    low_stock_medicines = Medicine.query.filter(
+    # Low stock medicines with alternatives
+    low_stock_medicines_query = Medicine.query.filter(
         Medicine.stock <= Medicine.reorder_level
     ).order_by(Medicine.stock).all()
+
+    # Add alternatives to each low stock medicine
+    low_stock_medicines = []
+    for medicine in low_stock_medicines_query:
+        alternatives = medicine.get_alternatives()
+        available_alternatives = []
+        for alt in alternatives[:3]:  # Limit to top 3 alternatives
+            alt_med = Medicine.query.get(alt.alternative_medicine_id)
+            if alt_med and alt_med.stock > 0 and not alt_med.is_expired():
+                available_alternatives.append({
+                    'medicine': alt_med,
+                    'reason': alt.reason
+                })
+        low_stock_medicines.append({
+            'medicine': medicine,
+            'alternatives': available_alternatives
+        })
 
     return render_template('admin/admin_dashboard.html',
                            total_sales=total_sales,
