@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+
+{% block title %}Predictive Insights - Warehouse Inventory{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">
+        <i class="bi bi-graph-up-arrow"></i> Predictive Insights & Forecasting
+    </h1>
+
+    <!-- Seasonal Trends Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-calendar3"></i> Seasonal Sales Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="seasonalChart"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Current Season: <span class="badge bg-info">{{ seasonal_data.current_season }}</span></h5>
+                            {% if seasonal_data.highest_season %}
+                            <p class="mt-3">
+                                <strong>Highest Sales Season:</strong><br>
+                                <span class="badge bg-success">{{ seasonal_data.highest_season }}</span>
+                            </p>
+                            {% endif %}
+                            {% if seasonal_data.lowest_season %}
+                            <p>
+                                <strong>Lowest Sales Season:</strong><br>
+                                <span class="badge bg-warning text-dark">{{ seasonal_data.lowest_season }}</span>
+                            </p>
+                            {% endif %}
+
+                            <h6 class="mt-4">Seasonal Breakdown:</h6>
+                            <ul class="list-group">
+                                {% for season, data in seasonal_data.seasonal_data.items() %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ season }}
+                                    <span class="badge bg-primary">₹{{ "%.2f"|format(data.total_sales) }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Forecast Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-graph-up"></i> Sales Forecast (Next 3 Months)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Trend Analysis</h5>
+                            {% if forecast_data.trend == 'growing' %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-arrow-up-circle"></i> <strong>Growing</strong><br>
+                                Sales are trending upward
+                            </div>
+                            {% elif forecast_data.trend == 'declining' %}
+                            <div class="alert alert-warning">
+                                <i class="bi bi-arrow-down-circle"></i> <strong>Declining</strong><br>
+                                Sales are trending downward
+                            </div>
+                            {% elif forecast_data.trend == 'stable' %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-arrow-right-circle"></i> <strong>Stable</strong><br>
+                                Sales are relatively steady
+                            </div>
+                            {% else %}
+                            <div class="alert alert-secondary">
+                                <i class="bi bi-info-circle"></i> <strong>Insufficient Data</strong><br>
+                                Need more historical data for accurate trend analysis
+                            </div>
+                            {% endif %}
+
+                            <h6 class="mt-3">Forecasted Revenue:</h6>
+                            <ul class="list-group">
+                                {% for month, value in forecast_data.forecast %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>{{ month }}</span>
+                                    <span class="badge bg-success">₹{{ "%.2f"|format(value) }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Predictions Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Stock Depletion Predictions</h4>
+                </div>
+                <div class="card-body">
+                    {% if stock_predictions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Current Stock</th>
+                                    <th>Daily Avg Sales</th>
+                                    <th>Days Until Stockout</th>
+                                    <th>Predicted Date</th>
+                                    <th>Urgency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pred in stock_predictions %}
+                                <tr>
+                                    <td>{{ pred.medicine.name }}</td>
+                                    <td>{{ pred.current_stock }}</td>
+                                    <td>{{ pred.daily_avg_sales }}</td>
+                                    <td>{{ pred.days_until_stockout }}</td>
+                                    <td>{{ pred.predicted_stockout_date }}</td>
+                                    <td>
+                                        {% if pred.urgency == 'high' %}
+                                        <span class="badge bg-danger">High</span>
+                                        {% elif pred.urgency == 'medium' %}
+                                        <span class="badge bg-warning text-dark">Medium</span>
+                                        {% else %}
+                                        <span class="badge bg-info">Low</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> No critical stock depletion predictions at this time.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Reorder Recommendations Section -->
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-cart-check"></i> Reorder Recommendations</h4>
+                </div>
+                <div class="card-body">
+                    {% if reorder_recommendations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Current</th>
+                                    <th>Safety Level</th>
+                                    <th>Recommended Order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rec in reorder_recommendations[:10] %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ rec.medicine.name }}</strong><br>
+                                        <small class="text-muted">{{ rec.reason }}</small>
+                                    </td>
+                                    <td>{{ rec.current_stock }}</td>
+                                    <td>{{ rec.safety_stock }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ rec.recommended_order_quantity }} units</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> All medicines are adequately stocked.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Trends Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="bi bi-pie-chart"></i> Category Performance Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Category Statistics</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Sales</th>
+                                            <th>Transactions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for category, data in category_trends.items() %}
+                                        <tr>
+                                            <td>{{ category }}</td>
+                                            <td>₹{{ "%.2f"|format(data.total_sales) }}</td>
+                                            <td>{{ data.transaction_count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Medicines by Revenue -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0"><i class="bi bi-trophy"></i> Top 10 Medicines by Revenue</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="topMedicinesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Seasonal Sales Chart
+const seasonalCtx = document.getElementById('seasonalChart').getContext('2d');
+const seasonalData = {{ seasonal_data.seasonal_data | tojson }};
+const seasons = Object.keys(seasonalData);
+const seasonalSales = seasons.map(s => seasonalData[s].total_sales);
+
+new Chart(seasonalCtx, {
+    type: 'bar',
+    data: {
+        labels: seasons,
+        datasets: [{
+            label: 'Total Sales (₹)',
+            data: seasonalSales,
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(255, 99, 132, 0.6)'
+            ],
+            borderColor: [
+                'rgba(54, 162, 235, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Seasonal Sales Performance'
+            },
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Forecast Chart
+const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+const historicalData = {{ forecast_data.historical | tojson }};
+const forecastData = {{ forecast_data.forecast | tojson }};
+
+const allMonths = historicalData.map(d => d[0]).concat(forecastData.map(d => d[0]));
+const historicalValues = historicalData.map(d => d[1]);
+const forecastValues = new Array(historicalData.length).fill(null).concat(forecastData.map(d => d[1]));
+
+new Chart(forecastCtx, {
+    type: 'line',
+    data: {
+        labels: allMonths,
+        datasets: [{
+            label: 'Historical Sales',
+            data: historicalValues.concat(new Array(forecastData.length).fill(null)),
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderWidth: 2,
+            tension: 0.4
+        }, {
+            label: 'Forecast',
+            data: forecastValues,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Sales Forecast (Moving Average)'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Category Chart
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryData = {{ category_trends | tojson }};
+const categories = Object.keys(categoryData);
+const categorySales = categories.map(c => categoryData[c].total_sales);
+
+new Chart(categoryCtx, {
+    type: 'pie',
+    data: {
+        labels: categories,
+        datasets: [{
+            data: categorySales,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)',
+                'rgba(199, 199, 199, 0.6)',
+                'rgba(83, 102, 255, 0.6)',
+                'rgba(255, 99, 255, 0.6)'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Sales by Category'
+            },
+            legend: {
+                position: 'right'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ₹' + context.parsed.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Top Medicines Chart
+const topMedicinesCtx = document.getElementById('topMedicinesChart').getContext('2d');
+const topMedicines = {{ top_medicines | tojson }};
+const medicineNames = topMedicines.map(m => m[0]);
+const medicineRevenues = topMedicines.map(m => m[1]);
+
+new Chart(topMedicinesCtx, {
+    type: 'horizontalBar',
+    data: {
+        labels: medicineNames,
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: medicineRevenues,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Top Revenue Generating Medicines'
+            },
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '₹' + value.toLocaleString();
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
